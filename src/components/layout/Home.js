@@ -59,12 +59,15 @@ const Home = () => {
   }, []);
   const pushmessage = (e) => {
     e.preventDefault();
-    let data = {
+
+    const data = {
       message: messages_inp,
       sender: curr_user.name,
       time: Date.now(),
     };
+    console.log("bf", global_data);
     message.messages.push(data);
+    merge_msg.push(data);
     setglobal_data({
       ...global_data,
       [curr_user.name]: {
@@ -78,19 +81,48 @@ const Home = () => {
         ],
       },
     });
-
+    console.log("global", global_data);
     update(ref(realtime, "allusers"), global_data);
     setmessages_inp("");
   };
   const [message, setmessage] = React.useState({});
+  const [merge_msg, setMergeMessage] = React.useState([]);
   const setMessageScreen = (e, data) => {
     e.preventDefault();
+    var arr = userdata[curr_user.name].chats[0]["messages"]?.filter((item) => {
+      return item.sender == data.name;
+    });
+    var arr2 = userdata[data.name].chats[0]["messages"]?.filter((item) => {
+      return item.sender == curr_user.name;
+    });
+    if (arr.length == 0) {
+      arr = [
+        {
+          message: "",
+          sender: "",
+          time: "",
+        },
+      ];
+    }
+    if (arr2.length == 0) {
+      arr2 = [
+        {
+          message: "",
+          sender: "",
+          time: "",
+        },
+      ];
+    }
+    setMergeMessage([...arr2, ...arr]);
+
+    console.log("arr", data.message);
+
     setmessage(data);
-    console.log("data", data);
+    // console.log("data", data);
   };
   return (
     <>
-      {console.log("jsjsjsjsj", Object.values(userdata))}
+      {console.log("jsjsjsjsj", global_data)}
       <div className="layout-wrapper layout-content-navbar">
         <div className="layout-container">
           <Header />
@@ -106,30 +138,40 @@ const Home = () => {
                       <h2>Chats</h2>
                       <div className="contact">
                         {Object.values(userdata).map((item, id) => {
-                          return item.name != curr_user.name
-                            ? (console.log("hsiahhyx", item.chats[0]["name"]),
-                              (
-                                <>
-                                  <div
-                                    key={id}
-                                    onClick={(e) =>
-                                      setMessageScreen(e, item.chats[0])
-                                    }
-                                    className="pic rogers"
-                                    style={{
-                                      backgroundImage: `url(${item.chats[0]["url"]})`,
-                                    }}
-                                    // data-message={item.url}
-                                  ></div>
+                          return item.name != curr_user.name ? (
+                            <>
+                              <div style={{ marginBottom: "50px" }}>
+                                <div
+                                  key={id}
+                                  onClick={(e) =>
+                                    setMessageScreen(e, item.chats[0])
+                                  }
+                                  className="pic rogers"
+                                  // style={{
+                                  //   backgroundImage: `url(${item.chats[0]["url"]})`,
+                                  // }}
 
-                                  <div className="badge">1</div>
-                                  <div className="name">{item.name}</div>
-                                  <div className="message">
-                                    {item.chats[0]["messages"][0]["message"]}
-                                  </div>
-                                </>
-                              ))
-                            : null;
+                                  // data-message={item.url}
+                                >
+                                  <img
+                                    style={{
+                                      borderRadius: "50%",
+                                      width: "70px",
+                                      height: "70px",
+                                    }}
+                                    referrerPolicy="no-referrer"
+                                    src={item.chats[0]["url"]}
+                                  />
+                                </div>
+
+                                <div className="badge">1</div>
+                                <div className="name">{item.name}</div>
+                                <div className="message">
+                                  {item.chats[0]["messages"][0]["message"]}
+                                </div>
+                              </div>
+                            </>
+                          ) : null;
                         })}
                       </div>
                     </div>
@@ -146,22 +188,24 @@ const Home = () => {
                         <div className="messages" id="chat">
                           <div className="time">{message.messages[0].time}</div>
 
-                          {message.messages?.map((item) => {
+                          {merge_msg?.map((item) => {
                             return (
                               <>
-                                {item.sender == curr_user.name ? (
-                                  <div className="message parker">
-                                    {item.message}<br/>
-                                    <span>{item.sender}</span>
-                                  </div>
-                                ) : (
-                                  <div className="message stark">
-                                    {item.message}
-                                    <br/>
-                                    <span>{item.sender}</span>
-                                    
-                                  </div>
-                                )}
+                                {item.message != "" ? (
+                                  item.sender == curr_user.name ? (
+                                    <div className="message parker">
+                                      {item.message}
+                                      <br />
+                                      <span>{item.sender}</span>
+                                    </div>
+                                  ) : (
+                                    <div className="message stark">
+                                      {item.message}
+                                      <br />
+                                      <span>{item.sender}</span>
+                                    </div>
+                                  )
+                                ) : null}
                               </>
                             );
                           })}
@@ -178,6 +222,7 @@ const Home = () => {
                             onChange={(e) => setmessages_inp(e.target.value)}
                             placeholder="Type your message here!"
                             type="text"
+                            value={messages_inp}
                           />
                           <i
                             onClick={pushmessage}
