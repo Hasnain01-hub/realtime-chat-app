@@ -181,17 +181,20 @@ const GroupChat = () => {
 
             <div className="container-xxl flex-grow-1 container-p-y">
               <div className="row">
-                <div className="col-lg-12 col-md-4 order-1">
+                <div className="col-lg-12 order-1">
                   <div>
                     <div className="contacts">
-                      <i className="fas fa-bars fa-2x"></i>
-                      <h2>Chats</h2>
+                      <i className="fas fa-bars fa-2x mobile"></i>
+                      <h2 className="mobile">Chats</h2>
                       <div className="contact">
                         {Object.values(grpdata)?.map((item) => {
                           return (
                             item.members.includes(curr_user.name) && (
                               <>
-                                <div style={{ marginBottom: "50px" }}>
+                                <div
+                                  style={{ marginBottom: "50px" }}
+                                  className="mobile-bar"
+                                >
                                   <div
                                     onClick={(e) => setMessageScreen(e, item)}
                                     className="pic rogers"
@@ -289,8 +292,6 @@ const GroupChat = () => {
                           )}
                         </div>
                         <div className="input">
-                          <i className="fas fa-camera"></i>
-                          <i className="far fa-laugh-beam"></i>
                           <input
                             onChange={(e) => setmessages_inp(e.target.value)}
                             placeholder="Type your message here!"

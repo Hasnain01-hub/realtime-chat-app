@@ -222,6 +222,110 @@ html {
 .chat .input input:placeholder {
   color: #999;
 }
+@media only screen and (max-width: 900px) {
+  .contact {
+    margin-bottom: 1rem !important;
+    padding-left: 0;
+    overflow-x: auto;
+    /* flex-wrap: wrap; */
+    /* height: auto; */
+    display: flex;
+    flex-direction: row;
+    justify-content: initial;
+  }
+  .mobile-bar {
+    margin-left: 14px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0 !important;
+    gap: 5px;
+  }
+  .chat .input {
+    box-sizing: border-box;
+    flex-basis: 4rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+  }
+  .contact .badge {
+    box-sizing: border-box;
+    position: absolute;
+    width: 1.5rem;
+    height: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    padding-top: 0.125rem;
+    border-radius: 1rem;
+    top: 0;
+    left: 6.5rem;
+    background: #333;
+    color: white;
+  }
+  .mobile {
+    display: none;
+  }
+  .chat {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 38rem;
+    width: auto;
+    margin-left: 0;
+    z-index: 2;
+    box-sizing: border-box;
+    border-radius: 1rem;
+    background: white;
+    box-shadow: 0 0 8rem 0 rgba(0, 0, 0, 0.1),
+      0rem 2rem 4rem -3rem rgba(0, 0, 0, 0.5);
+  }
+  .startchat {
+    font-weight: 500;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    display: flex;
+    font-size: 25px;
+    letter-spacing: 2px;
+    height: 100%;
+    align-items: center;
+    margin-bottom: 0.125rem;
+  }
+  .contacts {
+    position: initial;
+    left: 0;
+    transform: translate(0, 0);
+    width: 18rem;
+    display: initial;
+    /* flex-direction: row; */
+    height: auto;
+    overflow-x: auto;
+    padding: 0;
+    box-sizing: border-box;
+    border-radius: 1rem 0 0 1rem;
+    cursor: pointer;
+    background: white;
+    box-shadow: 0 0 8rem 0 rgba(0, 0, 0, 0.1),
+      2rem 2rem 4rem -3rem rgba(0, 0, 0, 0.5);
+    transition: transform 500ms;
+  }
+  .chat .contact.bar {
+    flex-basis: auto;
+    flex-shrink: 0;
+    margin: 1rem;
+    flex-direction: row;
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+  .contact .pic {
+    position: relative;
+    left: 0;
+  }
+}
 
 @-webkit-keyframes typing {
   0%,
