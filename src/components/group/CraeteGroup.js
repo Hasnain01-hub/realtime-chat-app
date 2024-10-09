@@ -47,13 +47,14 @@ const CraeteGroup = () => {
               url: group.url,
               chats: [
                 {
-                  name: "john doe",
-                  chat_length: 0,
+                  // name: "john doe",
                   messages: [
                     {
-                      message: "hello",
+                      message: "",
                       sender: "bob",
-                      time: "12:00",
+                      content: "msg",
+                      fileUrl: "",
+                      time: Date.now(),
                     },
                   ],
                 },

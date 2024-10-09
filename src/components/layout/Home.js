@@ -1,5 +1,6 @@
 import React from "react";
 import { realtime } from "../../configs/Firebase";
+import { toast, ToastContainer } from "react-toastify";
 import firebase, { onValue, ref, update } from "firebase/database";
 import "./helper.css";
 
@@ -7,13 +8,17 @@ import "./helper.css";
 import { useNavigate } from "react-router-dom";
 import Header from "../../layout/Slider";
 import Nav from "../../layout/Nav";
+import axios from "axios";
 
 const Home = () => {
   const [userdata, setuserdata] = React.useState([]);
-  const [messages_inp, setmessages_inp] = React.useState([]);
+  const [messages_inp, setmessages_inp] = React.useState("");
+  const [file, setFile] = React.useState(null);
   const [curr_user, setuser] = React.useState({});
   const [global_data, setglobal_data] = React.useState({});
-  const nav = useNavigate();
+  const [message, setmessage] = React.useState({});
+  const [merge_msg, setMergeMessage] = React.useState([]);
+  console.log(merge_msg, "merge_msg");
   React.useEffect(() => {
     let user = JSON.parse(window.localStorage.getItem("user"));
     if (user && user.name) {
@@ -36,12 +41,15 @@ const Home = () => {
                   {
                     name: user.name,
                     url: user.url,
-                    chat_length: 0,
+
                     messages: [
                       {
-                        message: "hello",
+                        message: "",
                         sender: "bob",
                         time: "12:00",
+                        content: "msg",
+                        fileUrl: "",
+                        fileType: "",
                       },
                     ],
                   },
@@ -57,12 +65,82 @@ const Home = () => {
       });
     }
   }, []);
+  const handleChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+  const uploadAssets = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await axios.post(
+        "https://api.pinata.cloud/pinning/pinFileToIPFS",
+        formData,
+        {
+          maxBodyLength: Infinity,
+          headers: {
+            pinata_api_key: process.env.REACT_APP_PINATA_API_KEY,
+            pinata_secret_api_key: process.env.REACT_APP_PINATA_SECRET_API_KEY,
+            "Content-Type": `multipart/form-data; boundary=${formData._boundary}`,
+          },
+        }
+      );
+      const resData = await res.data;
+      console.log(resData);
+      let file_data = {
+        message: messages_inp,
+        sender: curr_user.name,
+        fileUrl:
+          "https://copper-gigantic-minnow-346.mypinata.cloud/ipfs/" +
+          resData.IpfsHash,
+        content: "file",
+        fileType: file.type,
+        time: resData.Timestamp,
+      };
+      // toast.success("Success: file saved");
+      message.messages.push(file_data);
+      merge_msg.push(file_data);
+      setglobal_data({
+        ...global_data,
+        [curr_user.name]: {
+          ...global_data[curr_user.name],
+          chats: [
+            ...global_data[curr_user.name].chats,
+            {
+              ...global_data[curr_user.name].chats[0],
+              messages: [
+                ...global_data[curr_user.name].chats[0].messages,
+                file_data,
+              ],
+            },
+          ],
+        },
+      });
+
+      update(ref(realtime, "allusers"), global_data);
+      setFile(null);
+      setmessages_inp("");
+    } catch (error) {
+      setFile(null);
+      setmessages_inp("");
+      console.log(error);
+    }
+  };
+
   const pushmessage = (e) => {
+    console.log(file, "file");
+    if (file !== null) {
+      uploadAssets(e);
+      return;
+    }
     e.preventDefault();
 
     const data = {
       message: messages_inp,
       sender: curr_user.name,
+      fileUrl: "",
+      content: "msg",
+      fileType: "",
       time: Date.now(),
     };
     console.log("bf", global_data);
@@ -85,8 +163,7 @@ const Home = () => {
     update(ref(realtime, "allusers"), global_data);
     setmessages_inp("");
   };
-  const [message, setmessage] = React.useState({});
-  const [merge_msg, setMergeMessage] = React.useState([]);
+
   const setMessageScreen = (e, data) => {
     e.preventDefault();
     var arr = userdata[curr_user.name].chats[0]["messages"]?.filter((item) => {
@@ -95,12 +172,15 @@ const Home = () => {
     var arr2 = userdata[data.name].chats[0]["messages"]?.filter((item) => {
       return item.sender == curr_user.name;
     });
+    console.log(message, "message");
     if (arr.length == 0) {
       arr = [
         {
           message: "",
           sender: "",
           time: "",
+          fileUrl: "",
+          content: "",
         },
       ];
     }
@@ -110,16 +190,56 @@ const Home = () => {
           message: "",
           sender: "",
           time: "",
+          fileUrl: "",
+          content: "",
         },
       ];
     }
-    setMergeMessage([...arr2, ...arr]);
+    const mergedArray = [...arr, ...arr2];
+
+    // Sort the merged array by 'time' in ascending order
+    mergedArray.sort((a, b) => new Date(a.time) - new Date(b.time));
+
+    setMergeMessage(mergedArray);
 
     console.log("arr", data.message);
 
     setmessage(data);
     // console.log("data", data);
   };
+
+  const renderFileContent = ({ item, curr_user }) => {
+    switch (item.fileType) {
+      case "image/png":
+      case "image/jpeg":
+      case "image/gif":
+        return (
+          <img
+            src={item.fileUrl}
+            alt={item.message}
+            style={{ maxWidth: "100%", height: "auto" }}
+          />
+        );
+      case "application/pdf":
+        return (
+          <iframe
+            src={item.fileUrl}
+            title={item.message}
+            style={{ width: "100%", height: "500px" }}
+            frameBorder="0"
+          />
+        );
+      default:
+        return (
+          <div>
+            <a href={item.fileUrl} target="_blank" rel="noopener noreferrer">
+              Download File
+            </a>
+          </div>
+        );
+    }
+  };
+
   return (
     <>
       {console.log("jsjsjsjsj", global_data)}
@@ -140,7 +260,7 @@ const Home = () => {
                         {Object.values(userdata).map((item, id) => {
                           return item.name != curr_user.name ? (
                             <>
-                              <div style={{ marginBottom: "50px" }}>
+                              <div key={id} style={{ marginBottom: "50px" }}>
                                 <div
                                   key={id}
                                   onClick={(e) =>
@@ -154,6 +274,7 @@ const Home = () => {
                                   // data-message={item.url}
                                 >
                                   <img
+                                    alt=""
                                     style={{
                                       borderRadius: "50%",
                                       width: "70px",
@@ -188,32 +309,51 @@ const Home = () => {
                         <div className="messages" id="chat">
                           <div className="time">{message.messages[0].time}</div>
 
-                          {merge_msg?.map((item) => {
-                            return (
-                              <>
-                                {item.message != "" ? (
-                                  item.sender == curr_user.name ? (
-                                    <div className="message parker">
-                                      {item.message}
-                                      <br />
-                                      <span>{item.sender}</span>
-                                    </div>
-                                  ) : (
-                                    <div className="message stark">
-                                      {item.message}
-                                      <br />
-                                      <span>{item.sender}</span>
-                                    </div>
-                                  )
-                                ) : null}
-                              </>
-                            );
-                          })}
-                          <div className="message stark">
-                            <div className="typing typing-1"></div>
-                            <div className="typing typing-2"></div>
-                            <div className="typing typing-3"></div>
-                          </div>
+                          {merge_msg.length > 0
+                            ? merge_msg?.map((item, index) => {
+                                console.log("item", merge_msg);
+                                return (
+                                  <>
+                                    {item.content === "file" && (
+                                      <div
+                                        className={
+                                          item.sender === curr_user.name
+                                            ? `message parker`
+                                            : "message stark"
+                                        }
+                                      >
+                                        {renderFileContent({
+                                          item,
+                                          curr_user,
+                                        })}
+                                      </div>
+                                    )}
+                                    {item.message !== "" && (
+                                      <div
+                                        className={
+                                          item.sender === curr_user.name
+                                            ? "message parker"
+                                            : "message stark"
+                                        }
+                                      >
+                                        {item.message}
+                                        <br />
+                                        <span>{item.sender}</span>
+                                      </div>
+                                    )}{" "}
+                                  </>
+                                );
+                              })
+                            : ""}
+                          {messages_inp.length > 0 ? (
+                            <div className="message stark">
+                              <div className="typing typing-1"></div>
+                              <div className="typing typing-2"></div>
+                              <div className="typing typing-3"></div>
+                            </div>
+                          ) : (
+                            ""
+                          )}
                         </div>
                         <div className="input">
                           <i className="fas fa-camera"></i>
@@ -224,6 +364,25 @@ const Home = () => {
                             type="text"
                             value={messages_inp}
                           />
+                          <input
+                            id="file-input"
+                            className="d-none"
+                            type="file"
+                            onChange={handleChange}
+                            required
+                          />
+                          <label htmlFor="file-input">
+                            <svg
+                              // className="ri-send-plane-fill"
+                              width="24"
+                              className="m-2 cursor-pointer"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M14 13.5V8C14 5.79086 12.2091 4 10 4C7.79086 4 6 5.79086 6 8V13.5C6 17.0899 8.91015 20 12.5 20C16.0899 20 19 17.0899 19 13.5V4H21V13.5C21 18.1944 17.1944 22 12.5 22C7.80558 22 4 18.1944 4 13.5V8C4 4.68629 6.68629 2 10 2C13.3137 2 16 4.68629 16 8V13.5C16 15.433 14.433 17 12.5 17C10.567 17 9 15.433 9 13.5V8H11V13.5C11 14.3284 11.6716 15 12.5 15C13.3284 15 14 14.3284 14 13.5Z"></path>
+                            </svg>
+                          </label>
                           <i
                             onClick={pushmessage}
                             className="ri-send-plane-fill"

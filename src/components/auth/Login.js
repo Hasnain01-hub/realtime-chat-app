@@ -37,9 +37,21 @@ const Login = () => {
           if (doc.exists) {
             separatedString = doc.data();
             console.log("already hee", separatedString);
+            // window.localStorage.setItem(
+            //   "user",
+            //   JSON.stringify(separatedString)
+            // );
             window.localStorage.setItem(
               "user",
-              JSON.stringify(separatedString)
+              JSON.stringify({
+                name: separatedString.email.split("@")[0],
+                email: separatedString.email,
+                url:
+                  separatedString.photoURL ??
+                  "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
+                token: separatedString.token,
+                id: separatedString.email,
+              })
             );
             nav("/dashboard");
           } else {
@@ -52,6 +64,8 @@ const Login = () => {
                   user.photoURL ??
                   "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png",
                 email: user.email,
+                token: idTokenResult.token,
+                id: user.email,
               })
               .then(() => {
                 window.localStorage.setItem(
