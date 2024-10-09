@@ -71,13 +71,13 @@ const GroupChat = () => {
         time: resData.Timestamp,
       };
       message.chats[0]["messages"].push(file_data);
-      console.log("msg data", message);
-      setglobal_data({
+
+      let data = {
         ...global_data,
         [message.name]: {
           ...global_data[message.name],
           chats: [
-            ...global_data[message.name].chats,
+            // ...global_data[message.name].chats,
             {
               ...global_data[message.name].chats[0],
               messages: [
@@ -87,9 +87,11 @@ const GroupChat = () => {
             },
           ],
         },
-      });
+      };
+      console.log(data);
+      setglobal_data(data);
 
-      update(ref(realtime, "group"), global_data);
+      await update(ref(realtime, "group"), data);
       setFile(null);
       setmessages_inp("");
     } catch (error) {
@@ -97,10 +99,8 @@ const GroupChat = () => {
       setmessages_inp("");
       console.log(error);
     }
-
-    toast.success("Success: Chat saved");
   };
-  const pushmessage = (e) => {
+  const pushmessage = async (e) => {
     if (file !== null) {
       uploadAssets(e);
       return;
@@ -116,21 +116,22 @@ const GroupChat = () => {
     };
     message.chats[0]["messages"].push(data);
     console.log("msg data", message);
-    setglobal_data({
+    let state_data = {
       ...global_data,
       [message.name]: {
         ...global_data[message.name],
         chats: [
-          ...global_data[message.name].chats,
+          // ...global_data[message.name].chats,
           {
             ...global_data[message.name].chats[0],
             messages: [...global_data[message.name].chats[0].messages, data],
           },
         ],
       },
-    });
+    };
+    setglobal_data(state_data);
 
-    update(ref(realtime, "group"), global_data);
+    await update(ref(realtime, "group"), state_data);
     setmessages_inp("");
   };
 

@@ -100,12 +100,12 @@ const Home = () => {
       // toast.success("Success: file saved");
       message.messages.push(file_data);
       merge_msg.push(file_data);
-      setglobal_data({
+      let state_data = {
         ...global_data,
         [curr_user.name]: {
           ...global_data[curr_user.name],
           chats: [
-            ...global_data[curr_user.name].chats,
+            // ...global_data[curr_user.name].chats,
             {
               ...global_data[curr_user.name].chats[0],
               messages: [
@@ -115,9 +115,10 @@ const Home = () => {
             },
           ],
         },
-      });
+      };
+      setglobal_data(state_data);
 
-      update(ref(realtime, "allusers"), global_data);
+      update(ref(realtime, "allusers"), state_data);
       setFile(null);
       setmessages_inp("");
     } catch (error) {
@@ -143,24 +144,25 @@ const Home = () => {
       fileType: "",
       time: Date.now(),
     };
-    console.log("bf", global_data);
+
     message.messages.push(data);
     merge_msg.push(data);
-    setglobal_data({
+    let state_data = {
       ...global_data,
       [curr_user.name]: {
         ...global_data[curr_user.name],
         chats: [
-          ...global_data[curr_user.name].chats,
+          // ...global_data[curr_user.name].chats,
           {
             ...global_data[curr_user.name].chats[0],
             messages: [...global_data[curr_user.name].chats[0].messages, data],
           },
         ],
       },
-    });
-    console.log("global", global_data);
-    update(ref(realtime, "allusers"), global_data);
+    };
+    setglobal_data(state_data);
+    console.log("global", state_data);
+    update(ref(realtime, "allusers"), state_data);
     setmessages_inp("");
   };
 
