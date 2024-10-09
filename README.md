@@ -24,9 +24,21 @@
 
 ## Screenshots
 
-| ![](Images/chat.png) | ![](Images/creategrp.png) | ![](Images/group.png) | ![](Images/joingrp.png) |
-| :------------------: | :-----------------------: | :-------------------: | :---------------------: |
-|     Chat Screen      |       Create Group        |      Group Chat       |       Join Group        |
+| ![](Images/chat.png)
+| :-------------: |
+| Chat Screen
+
+|![](Images/creategrp.png)
+| :-------------: |
+|Create Group
+
+| ![](Images/group.png)
+| :-------------: |
+|Group Chat
+
+| ![](Images/joingrp.png)
+| :-------------: |
+|Join Group
 
 | ![](Images/login.png)
 | :-------------: |
