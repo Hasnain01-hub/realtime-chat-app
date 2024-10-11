@@ -39,7 +39,7 @@ const GroupChat = () => {
       });
     }
     nav("/");
-  }, []);
+  }, [nav]);
 
   const uploadAssets = async (e) => {
     e.preventDefault();
@@ -82,7 +82,7 @@ const GroupChat = () => {
               ...global_data[message.name].chats[0],
               messages: [
                 ...global_data[message.name].chats[0].messages,
-                file_data,
+                // file_data,
               ],
             },
           ],
@@ -106,33 +106,39 @@ const GroupChat = () => {
       return;
     }
     e.preventDefault();
-    let data = {
-      message: messages_inp,
-      sender: curr_user.name,
-      fileUrl: "",
-      content: "msg",
-      fileType: "",
-      time: Date.now(),
-    };
-    message.chats[0]["messages"].push(data);
-    console.log("msg data", message);
-    let state_data = {
-      ...global_data,
-      [message.name]: {
-        ...global_data[message.name],
-        chats: [
-          // ...global_data[message.name].chats,
-          {
-            ...global_data[message.name].chats[0],
-            messages: [...global_data[message.name].chats[0].messages, data],
-          },
-        ],
-      },
-    };
-    setglobal_data(state_data);
-
-    update(ref(realtime, "group"), state_data);
-    setmessages_inp("");
+    try {
+      const data = {
+        message: messages_inp,
+        sender: curr_user.name,
+        fileUrl: "",
+        content: "msg",
+        fileType: "",
+        time: Date.now(),
+      };
+      message.chats[0]["messages"].push(data);
+      console.log("msg data", message);
+      const state_data = {
+        ...global_data,
+        [message.name]: {
+          ...global_data[message.name],
+          chats: [
+            // ...global_data[message.name].chats,
+            {
+              // ...global_data[message.name].chats[0],
+              messages: [...global_data[message.name].chats[0].messages],
+            },
+          ],
+        },
+      };
+      setglobal_data(state_data);
+      console.log(state_data, "state_data");
+      await update(ref(realtime, "group"), state_data);
+      setmessages_inp("");
+    } catch (error) {
+      setFile(null);
+      setmessages_inp("");
+      console.log(error);
+    }
   };
 
   const setMessageScreen = (e, data) => {
