@@ -91,7 +91,7 @@ const GroupChat = () => {
       console.log(data);
       setglobal_data(data);
 
-      await update(ref(realtime, "group"), data);
+      update(ref(realtime, "group"), data);
       setFile(null);
       setmessages_inp("");
     } catch (error) {
@@ -131,7 +131,7 @@ const GroupChat = () => {
     };
     setglobal_data(state_data);
 
-    await update(ref(realtime, "group"), state_data);
+    update(ref(realtime, "group"), state_data);
     setmessages_inp("");
   };
 
@@ -172,7 +172,6 @@ const GroupChat = () => {
   };
   return (
     <>
-      {console.log("jsjsjsjsj", message)}
       <div className="layout-wrapper layout-content-navbar">
         <div className="layout-container">
           <Header />
