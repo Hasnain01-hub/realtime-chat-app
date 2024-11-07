@@ -1,4 +1,4 @@
-# Project Title - Realtime Chat App
+# Project Title - 2Connect
 
 # Features:
 
